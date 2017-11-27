@@ -25,11 +25,25 @@ export default class CircularProgress extends React.Component {
   }
 
   render() {
-    const { size, width, tintColor, backgroundColor, style, strokeCap, rotation, cropDegree, children } = this.props;
+    const { size, width, tintColor, backgroundColor, style, strokeCap, rotation, cropDegree, children, dashes } = this.props;
     const backgroundPath = this.circlePath(size / 2, size / 2, size / 2 - width / 2, 0, (360 * 99.9 / 100) - cropDegree);
 
     const fill = this.extractFill(this.props.fill);
     const circlePath = this.circlePath(size / 2, size / 2, size / 2 - width / 2, 0, ((360 * 99.9 / 100) - cropDegree) * fill / 100 );
+
+    const numberOfDashes = dashes * 2 - 1;
+
+    const dashPercentage = 1 / numberOfDashes;
+
+    const circleCut = (360 - cropDegree) / 360;
+
+    const strokeDashCalculated = ((((size - width) * Math.PI)) * dashPercentage) * circleCut;
+
+    let storkeDashArray = [strokeDashCalculated];
+
+    if (Platform.OS === 'android') {
+      storkeDashArray = [strokeDashCalculated * 2, strokeDashCalculated * 2];
+    }
 
     return (
       <View style={style}>
@@ -40,11 +54,13 @@ export default class CircularProgress extends React.Component {
             <Shape d={backgroundPath}
                    stroke={backgroundColor}
                    strokeWidth={width}
-                   strokeCap={strokeCap}/>
+                   strokeCap={strokeCap}
+                   strokeDash={storkeDashArray}/>
             <Shape d={circlePath}
                    stroke={tintColor}
                    strokeWidth={width}
-                   strokeCap={strokeCap}/>
+                   strokeCap={strokeCap}
+                   strokeDash={storkeDashArray}/>
           </Group>
         </Surface>
         {
@@ -65,7 +81,8 @@ CircularProgress.propTypes = {
   backgroundColor: PropTypes.string,
   rotation: PropTypes.number,
   cropDegree: PropTypes.number,
-  children: PropTypes.func
+  children: PropTypes.func,
+  dashes: PropTypes.number.isRequired
 }
 
 CircularProgress.defaultProps = {
